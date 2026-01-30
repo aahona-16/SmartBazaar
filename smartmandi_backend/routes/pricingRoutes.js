@@ -106,8 +106,21 @@ router.post('/recommend', async (req, res) => {
     let timeoutHandle;
 
     try {
-      const pythonProcess = spawn('python', [pythonScript, 'predict_pricing'], { stdio: ['pipe', 'pipe', 'pipe'] });
+      let pythonExecutable = process.env.PYTHON_EXECUTABLE || 'python';
+      let pricingPythonScript = pythonScript;
+      
+      // Convert forward slashes to backslashes for Windows
+      pythonExecutable = pythonExecutable.replace(/\//g, '\\');
+      pricingPythonScript = pricingPythonScript.replace(/\//g, '\\');
+      
+      console.log('Executing python with:', pythonExecutable, pricingPythonScript);
+      
+      // Use spawn instead of exec to properly handle stdin on Windows
+      const pythonProcess = spawn(pythonExecutable, [pricingPythonScript, 'predict_pricing'], {
+        maxBuffer: 10 * 1024 * 1024 // 10MB buffer
+      });
 
+      // Write input data to stdin
       pythonProcess.stdin.write(JSON.stringify(inputData));
       pythonProcess.stdin.end();
 

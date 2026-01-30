@@ -121,7 +121,7 @@ router.post('/predict', async (req, res) => {
     // Call Python model service using child_process
     console.log('Calling Python model service with data:', JSON.stringify(inputData, null, 2));
     
-    const pythonScript = path.join(__dirname, '../python/modelService.py');
+    let pythonScript = path.join(__dirname, '../python/modelService.py');
     const inputJson = JSON.stringify(inputData);
     
     console.log('Executing python script with input length:', inputJson.length);
@@ -133,9 +133,16 @@ router.post('/predict', async (req, res) => {
     
     try {
       // Use stdin to pass data instead of command line arguments to avoid JSON parsing issues
-      const pythonProcess = spawn('python', [pythonScript, 'predict_demand'], {
-        stdio: ['pipe', 'pipe', 'pipe'], // stdin, stdout, stderr
-        shell: false
+      let pythonExecutable = process.env.PYTHON_EXECUTABLE || 'python';
+      // Convert forward slashes to backslashes for Windows
+      pythonExecutable = pythonExecutable.replace(/\//g, '\\');
+      pythonScript = pythonScript.replace(/\//g, '\\');
+      
+      console.log('Executing python with:', pythonExecutable, pythonScript);
+      
+      // Use spawn instead of exec to properly handle stdin on Windows
+      const pythonProcess = spawn(pythonExecutable, [pythonScript, 'predict_demand'], {
+        maxBuffer: 10 * 1024 * 1024 // 10MB buffer
       });
       
       let outputData = '';

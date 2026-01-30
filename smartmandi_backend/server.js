@@ -3,7 +3,16 @@ const mongoose = require('mongoose');
 const cors = require('cors');
 const helmet = require('helmet');
 const morgan = require('morgan');
+const path = require('path');
 require('dotenv').config();
+
+// Set Python executable to virtual environment
+if (!process.env.PYTHON_EXECUTABLE) {
+  // __dirname is smartmandi_backend, need to go to SmartMandis (parent of parent)
+  const pythonPath = path.join(__dirname, '..', '..', '.venv', 'Scripts', 'python.exe');
+  process.env.PYTHON_EXECUTABLE = pythonPath;
+  console.log('Using Python executable:', pythonPath);
+}
 
 const app = express();
 
@@ -17,15 +26,16 @@ app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 // MongoDB connection
 const connectDB = async () => {
   try {
-    if (process.env.MONGODB_URI) {
-      await mongoose.connect(process.env.MONGODB_URI);
-      console.log('MongoDB connected successfully');
-    } else {
-      console.log('MongoDB URI not provided, running without database');
-    }
+    const mongoUri = process.env.MONGODB_URI || 'mongodb://localhost:27017/smartmandi';
+    await mongoose.connect(mongoUri, {
+      useNewUrlParser: true,
+      useUnifiedTopology: true,
+    });
+    console.log('✓ MongoDB connected successfully');
+    console.log(`Connected to: ${mongoUri}`);
   } catch (error) {
-    console.error('MongoDB connection failed:', error.message);
-    // Don't exit the process, continue without database for now
+    console.error('✗ MongoDB connection failed:', error.message);
+    process.exit(1);
   }
 };
 
