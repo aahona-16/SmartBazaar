@@ -172,9 +172,8 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 ## 👥 Team
 
-- **Nitish Dwivedi** - Project Lead & ML Engineer
-- **Contributors** - See [Contributors](https://github.com/NitishDwi07/SmartMandis/contributors)
-
+- **Mridul Gupta** - Project Lead & ML Engineer
+- 
 ## 🎯 Future Enhancements
 
 - [ ] Mobile application development
